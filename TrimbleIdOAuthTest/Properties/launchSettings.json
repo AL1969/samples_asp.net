@@ -1,0 +1,27 @@
+{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:64881/",
+      "sslPort": 0
+    }
+  },
+  "profiles": {
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchUrl": "http://localhost:64881",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "TrimbleIdOAuthTest": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "http://localhost:5000",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
