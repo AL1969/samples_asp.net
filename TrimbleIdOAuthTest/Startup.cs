@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using TrimbleIdOAuthTest.Data;
 using TrimbleIdOAuthTest.Models;
 using TrimbleIdOAuthTest.Services;
@@ -135,58 +136,50 @@ namespace TrimbleIdOAuthTest
                 // Retrieving user information is unique to each provider.
                 Events = new OAuthEvents
                 {
+                    OnCreatingTicket = async context => { await CreatingTrimbleIdAuthTicket(context); }
+                    /*
                     OnCreatingTicket = async context =>
                     {
+                        //var tmp_xxxstr = "hello";
+                        //Microsoft.AspNetCore.Http.Internal.QueryCollection querycoll = new Microsoft.AspNetCore.Http.Internal.QueryCollection();
+                        //async querycoll = context.Request.Query;
+                        //object value;
+                        //Microsoft.
+                        await context.Request.Query.TryGetValue("code", out ValueTask);
+
+                        //var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
+                        //request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+                        //request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
                         // Get the GitHub user
-                        var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
-                        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
-                        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                        //OAuthCreatingTicketContext
+                        //Microsoft.AspNetCore.Http.HttpRequest
+                        //await HttpRequest.query = context.Request.Query;
+                        //var codestr = query.TryGetValue("code");
+                        //string codestr = "";
+                        //var bCodeFound = query.TryGetValue("code", codestr);
 
-                        var response = await context.Backchannel.SendAsync(request, context.HttpContext.RequestAborted);
-                        response.EnsureSuccessStatusCode();
+                        //var response = await context.Backchannel.SendAsync(request, context.HttpContext.RequestAborted);
+                        //response.EnsureSuccessStatusCode();
 
-                        var user = JObject.Parse(await response.Content.ReadAsStringAsync());
+                        //var user = JObject.Parse(await response.Content.ReadAsStringAsync());
 
-                        var identifier = user.Value<string>("id");
-                        if (!string.IsNullOrEmpty(identifier))
-                        {
-                            context.Identity.AddClaim(new Claim(
-                                ClaimTypes.NameIdentifier, identifier,
-                                ClaimValueTypes.String, context.Options.ClaimsIssuer));
-                        }
+                        //var identifier = user.Value<string>("id");
+                        //if (!string.IsNullOrEmpty(identifier))
+                        //{
+                        //    context.Identity.AddClaim(new Claim(
+                        //        ClaimTypes.NameIdentifier, identifier,
+                        //        ClaimValueTypes.String, context.Options.ClaimsIssuer));
+                        //}
 
-                        var userName = user.Value<string>("login");
-                        if (!string.IsNullOrEmpty(userName))
-                        {
-                            context.Identity.AddClaim(new Claim(
-                                ClaimsIdentity.DefaultNameClaimType, userName,
-                                ClaimValueTypes.String, context.Options.ClaimsIssuer));
-                        }
-
-                        var name = user.Value<string>("name");
-                        if (!string.IsNullOrEmpty(name))
-                        {
-                            context.Identity.AddClaim(new Claim(
-                                "urn:github:name", name,
-                                ClaimValueTypes.String, context.Options.ClaimsIssuer));
-                        }
-
-                        var email = user.Value<string>("email");
-                        if (!string.IsNullOrEmpty(email))
-                        {
-                            context.Identity.AddClaim(new Claim(
-                                ClaimTypes.Email, email,
-                                ClaimValueTypes.Email, context.Options.ClaimsIssuer));
-                        }
-
-                        var link = user.Value<string>("url");
-                        if (!string.IsNullOrEmpty(link))
-                        {
-                            context.Identity.AddClaim(new Claim(
-                                "urn:github:url", link,
-                                ClaimValueTypes.String, context.Options.ClaimsIssuer));
-                        }
+                        //var userName = user.Value<string>("login");
                     }
+                    //OnRedirectToAuthorizationEndpoint = async context =>
+                    //{
+                    // Get the GitHub user
+                    //    var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
+                    //}
+                */
                 }
             });
 
@@ -199,5 +192,13 @@ namespace TrimbleIdOAuthTest
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
         }
+
+        private static async Task CreatingTrimbleIdAuthTicket(OAuthCreatingTicketContext context)
+        {
+            StringValues codestr = new StringValues();
+            var bFoundCode = context.Request.Query.TryGetValue("code", out codestr);
+            string tmp_xxx = "hello";
+        }
     }
+
 }
