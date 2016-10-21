@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -197,7 +198,45 @@ namespace TrimbleIdOAuthTest
         {
             StringValues codestr = new StringValues();
             var bFoundCode = context.Request.Query.TryGetValue("code", out codestr);
-            string tmp_xxx = "hello";
+            string redirUrl = "http://localhost:64881/signin-tid-token";
+            string redirUrlEnc = HtmlEncoder.Default.Encode(redirUrl);
+            string sPostUrl = "https://identity-stg.trimble.com" + "/i/oauth2/token?grant_type=authorization_code&tenantDomain=trimble.com&code=" +
+                codestr + "&redirect_uri=" + redirUrlEnc;
+            var request = new HttpRequestMessage(HttpMethod.Post, sPostUrl);
+
+            string recAccessToken = context.AccessToken;
+            string testAccessToken = "vHDnG98OicY1asmxzcVFYYk_UJMa:UekcdFkvAWALmTrDSbBf7gVGVIsa";
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", testAccessToken);
+            //request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            //request.Headers.CacheControl = "no-cache";
+
+            var response = await context.Backchannel.SendAsync(request, context.HttpContext.RequestAborted);
+            response.EnsureSuccessStatusCode();
+            var content = response.Content.ReadAsStringAsync();
+
+            //var user = JObject.Parse(await response.Content.ReadAsStringAsync());
+
+            //        function requestTID_JWT(code) {
+            //            var instr = global.consumerKey + ":" + global.consumerSecret;
+            //            var options = {
+            //            host: 'identity-stg.trimble.com',
+            //path: '/i/oauth2/token?grant_type=authorization_code&tenantDomain=trimble.com&code=' + code + "&redirect_uri=" + encodeURIComponent(global.redirectLocalURL),
+            //method: "POST",
+            ////This is the only line that is new. `headers` is an object with the headers to request
+            //headers:
+            //            {
+            //                "Content-Type": "application/x-www-form-urlencoded",
+            //	"Authorization": "Basic " + new Buffer(instr).toString('base64'),
+            //	"Accept": "application/json",
+            //	"Cache-Control": "no-cache"
+
+            //            }
+            //        };
+            //        console.log("requestTID_JWT: code=" + code);
+
+            //        var req = https.request(options, (res) =>
+            //        {
+            //        }
         }
     }
 
