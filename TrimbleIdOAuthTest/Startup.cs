@@ -199,20 +199,60 @@ namespace TrimbleIdOAuthTest
             StringValues codestr = new StringValues();
             var bFoundCode = context.Request.Query.TryGetValue("code", out codestr);
             string redirUrl = "http://localhost:64881/signin-tid-token";
-            string redirUrlEnc = HtmlEncoder.Default.Encode(redirUrl);
+
+            System.Uri redirUri = new System.Uri(redirUrl);
+            //string redirUrlEnc = HtmlEncoder.Default.Encode(redirUrl);
+            //string redirUrlEnc = System.Uri.EscapeUriString(redirUrl);
+            //string redirUrlEnc = Microsoft.AspNetCore.Http.Extensions.UriHelper.Encode(redirUri);
+            string redirUrlEnc = System.Net.WebUtility.UrlEncode(redirUrl);
             string sPostUrl = "https://identity-stg.trimble.com" + "/i/oauth2/token?grant_type=authorization_code&tenantDomain=trimble.com&code=" +
                 codestr + "&redirect_uri=" + redirUrlEnc;
             var request = new HttpRequestMessage(HttpMethod.Post, sPostUrl);
 
             string recAccessToken = context.AccessToken;
-            string testAccessToken = "vHDnG98OicY1asmxzcVFYYk_UJMa:UekcdFkvAWALmTrDSbBf7gVGVIsa";
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", testAccessToken);
+            string testAccessTokenStr = "vHDnG98OicY1asmxzcVFYYk_UJMa:UekcdFkvAWALmTrDSbBf7gVGVIsa";
+            byte[] testAccessToken = System.Text.Encoding.UTF8.GetBytes(testAccessTokenStr);
+            string testAccessTokenBas64 = "Basic " + Microsoft.AspNetCore.Authentication.Base64UrlTextEncoder.Encode(testAccessToken);
+            //request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", testAccessTokenBas64);
             //request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            //request.Headers.Add("Cache-Control", "no-cache");
+            ////request.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+            //request.Headers.Add("Authorization", testAccessTokenBas64);
+            //request.Headers.Add("Accept", "application/json");
+
+            //request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(sPostUrl);
+            client.Timeout = new TimeSpan(0, 0, 90);
+            client.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+            client.DefaultRequestHeaders.Add("Authorization", testAccessTokenBas64);
+            //client.DefaultRequestHeaders.Add("Content-Type", "application/x-www-form-urlencoded");
+            //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            //client.DefaultRequestHeaders.con
+            ////request.Headers.Add("Content-Type", "application/)
+
+            //HttpContent _Body = new StringContent(Body);
+            //_Body.Headers.ContentType = new MediaTypeHeaderValue(_ContentType);
+            //Uri.EscapeUriString();
+            HttpContent cnt = new StringContent("");
+            cnt.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            //cnt.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+            var response = await client.PostAsync(sPostUrl, cnt);
+
+                
+
+
+
+            //request.Headers.Accept.Add()
             //request.Headers.CacheControl = "no-cache";
 
-            var response = await context.Backchannel.SendAsync(request, context.HttpContext.RequestAborted);
-            response.EnsureSuccessStatusCode();
-            var content = response.Content.ReadAsStringAsync();
+            //var response = await context.Backchannel.SendAsync(request, context.HttpContext.RequestAborted);
+            //response.EnsureSuccessStatusCode();
+            //var content = response.Content.ReadAsStringAsync();
+
+            string tmp_hello = "hello";
 
             //var user = JObject.Parse(await response.Content.ReadAsStringAsync());
 
