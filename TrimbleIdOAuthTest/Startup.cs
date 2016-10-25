@@ -201,12 +201,16 @@ namespace TrimbleIdOAuthTest
             string redirUrl = "http://localhost:64881/signin-tid-token";
 
             System.Uri redirUri = new System.Uri(redirUrl);
+
+            // *** AL - TEST: RE-USE all data from the JS client !!! (try it with curl before?)
+
             //string redirUrlEnc = HtmlEncoder.Default.Encode(redirUrl);
             //string redirUrlEnc = System.Uri.EscapeUriString(redirUrl);
             //string redirUrlEnc = Microsoft.AspNetCore.Http.Extensions.UriHelper.Encode(redirUri);
             string redirUrlEnc = System.Net.WebUtility.UrlEncode(redirUrl);
-            string sPostUrl = "https://identity-stg.trimble.com" + "/i/oauth2/token?grant_type=authorization_code&tenantDomain=trimble.com&code=" +
-                codestr + "&redirect_uri=" + redirUrlEnc;
+            //string sPostUrl = "https://identity-stg.trimble.com" + "/i/oauth2/token?grant_type=authorization_code&tenantDomain=trimble.com&code=" +
+            //    codestr + "&redirect_uri=" + redirUrlEnc;
+            string sPostUrl = "https://identity-stg.trimble.com/i/oauth2/token";
             var request = new HttpRequestMessage(HttpMethod.Post, sPostUrl);
 
             string recAccessToken = context.AccessToken;
@@ -222,24 +226,63 @@ namespace TrimbleIdOAuthTest
             //request.Headers.Add("Accept", "application/json");
 
             //request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            /*
             HttpClient client = new HttpClient();
             client.BaseAddress = new Uri(sPostUrl);
             client.Timeout = new TimeSpan(0, 0, 90);
             client.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
-            client.DefaultRequestHeaders.Add("Accept", "application/json");
+            //client.DefaultRequestHeaders.Add("Accept", "application/json");
             client.DefaultRequestHeaders.Add("Authorization", testAccessTokenBas64);
             //client.DefaultRequestHeaders.Add("Content-Type", "application/x-www-form-urlencoded");
-            //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             //client.DefaultRequestHeaders.con
             ////request.Headers.Add("Content-Type", "application/)
+            */
 
             //HttpContent _Body = new StringContent(Body);
             //_Body.Headers.ContentType = new MediaTypeHeaderValue(_ContentType);
             //Uri.EscapeUriString();
-            HttpContent cnt = new StringContent("");
-            cnt.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            //HttpContent cnt = new StringContent(sPostContent);
+            /*
+            var pairs = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("login", "abc")
+            };
+            HttpContent cnt = new FormUrlEncodedContent();
+            FormUrlEncodedContent
+            System.Net.Http.HttpContent = new HttpContent()
+            //cnt.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            cnt.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
             //cnt.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
             var response = await client.PostAsync(sPostUrl, cnt);
+            */
+            //string sPostContent = "grant_type=authorization_code&tenantDomain=trimble.com&code=" +
+            //    codestr + "&redirect_uri=" + redirUrlEnc;
+            var pairs = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("grant_type", "authorization_code"),
+                new KeyValuePair<string, string>("tenantDomain", "trimble.com"),
+                new KeyValuePair<string, string>("code", codestr),
+                new KeyValuePair<string, string>("redirect_uri", redirUrl)
+            };
+            var content = new FormUrlEncodedContent(pairs);
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri("https://identity-stg.trimble.com");
+            client.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
+            client.DefaultRequestHeaders.Add("Authorization", testAccessTokenBas64);
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var response = client.PostAsync("/i/oauth2/token", content).Result;
+            if (response.IsSuccessStatusCode)
+            {
+                string tmp_xxx = "success";
+            }
+
+
+
+
 
                 
 
@@ -252,7 +295,7 @@ namespace TrimbleIdOAuthTest
             //response.EnsureSuccessStatusCode();
             //var content = response.Content.ReadAsStringAsync();
 
-            string tmp_hello = "hello";
+            //string tmp_hello = "hello";
 
             //var user = JObject.Parse(await response.Content.ReadAsStringAsync());
 
