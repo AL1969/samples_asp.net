@@ -217,7 +217,7 @@ namespace TrimbleIdOAuthTest
             codestr = "ed4e14564a8b1b337bc4821c64464b6";
             redirUrl = "http://localhost:8888/auth_trimbleid/oauth_after.html";
             //redirUrl = "http%3A%2F%2Flocalhost%3A8888%2Fauth_trimbleid%2Foauth_after.html";
-            testAccessTokenBas64 = "SEE3NG02UFBZN1NzX19zejBVTVVER2ltTVlZYTpYcFZxQmYyY1kyZ0UwVzdxeUhZOXNPdFBOZmdh";
+            testAccessTokenBas64 = "Basic SEE3NG02UFBZN1NzX19zejBVTVVER2ltTVlZYTpYcFZxQmYyY1kyZ0UwVzdxeUhZOXNPdFBOZmdh";
 
             // see http://stackoverflow.com/questions/15176538/net-httpclient-how-to-post-string-value
             //     https://www.asp.net/web-api/overview/advanced/calling-a-web-api-from-a-net-client
@@ -245,6 +245,10 @@ namespace TrimbleIdOAuthTest
             if (response.IsSuccessStatusCode)
             {
                 string tmp_xxx = "success";
+            }
+            else
+            {
+                string msg = response.Content.ReadAsStringAsync().Result;
             }
 
         }
