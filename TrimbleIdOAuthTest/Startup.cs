@@ -204,12 +204,7 @@ namespace TrimbleIdOAuthTest
 
             // *** AL - TEST: RE-USE all data from the JS client !!! (try it with curl before?)
 
-            //string redirUrlEnc = HtmlEncoder.Default.Encode(redirUrl);
-            //string redirUrlEnc = System.Uri.EscapeUriString(redirUrl);
-            //string redirUrlEnc = Microsoft.AspNetCore.Http.Extensions.UriHelper.Encode(redirUri);
             string redirUrlEnc = System.Net.WebUtility.UrlEncode(redirUrl);
-            //string sPostUrl = "https://identity-stg.trimble.com" + "/i/oauth2/token?grant_type=authorization_code&tenantDomain=trimble.com&code=" +
-            //    codestr + "&redirect_uri=" + redirUrlEnc;
             string sPostUrl = "https://identity-stg.trimble.com/i/oauth2/token";
             var request = new HttpRequestMessage(HttpMethod.Post, sPostUrl);
 
@@ -217,47 +212,17 @@ namespace TrimbleIdOAuthTest
             string testAccessTokenStr = "vHDnG98OicY1asmxzcVFYYk_UJMa:UekcdFkvAWALmTrDSbBf7gVGVIsa";
             byte[] testAccessToken = System.Text.Encoding.UTF8.GetBytes(testAccessTokenStr);
             string testAccessTokenBas64 = "Basic " + Microsoft.AspNetCore.Authentication.Base64UrlTextEncoder.Encode(testAccessToken);
-            //request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", testAccessTokenBas64);
-            //request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            //request.Headers.Add("Cache-Control", "no-cache");
-            ////request.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
-            //request.Headers.Add("Authorization", testAccessTokenBas64);
-            //request.Headers.Add("Accept", "application/json");
+            // overwrite with values from JS
+            codestr = "ed4e14564a8b1b337bc4821c64464b6";
+            redirUrl = "http://localhost:8888/auth_trimbleid/oauth_after.html";
+            //redirUrl = "http%3A%2F%2Flocalhost%3A8888%2Fauth_trimbleid%2Foauth_after.html";
+            testAccessTokenBas64 = "SEE3NG02UFBZN1NzX19zejBVTVVER2ltTVlZYTpYcFZxQmYyY1kyZ0UwVzdxeUhZOXNPdFBOZmdh";
 
-            //request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            /*
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri(sPostUrl);
-            client.Timeout = new TimeSpan(0, 0, 90);
-            client.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
-            //client.DefaultRequestHeaders.Add("Accept", "application/json");
-            client.DefaultRequestHeaders.Add("Authorization", testAccessTokenBas64);
-            //client.DefaultRequestHeaders.Add("Content-Type", "application/x-www-form-urlencoded");
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            //client.DefaultRequestHeaders.con
-            ////request.Headers.Add("Content-Type", "application/)
-            */
-
-            //HttpContent _Body = new StringContent(Body);
-            //_Body.Headers.ContentType = new MediaTypeHeaderValue(_ContentType);
-            //Uri.EscapeUriString();
-            //HttpContent cnt = new StringContent(sPostContent);
-            /*
-            var pairs = new List<KeyValuePair<string, string>>
-            {
-                new KeyValuePair<string, string>("login", "abc")
-            };
-            HttpContent cnt = new FormUrlEncodedContent();
-            FormUrlEncodedContent
-            System.Net.Http.HttpContent = new HttpContent()
-            //cnt.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            cnt.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
-            //cnt.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
-            var response = await client.PostAsync(sPostUrl, cnt);
-            */
-            //string sPostContent = "grant_type=authorization_code&tenantDomain=trimble.com&code=" +
-            //    codestr + "&redirect_uri=" + redirUrlEnc;
+            // see http://stackoverflow.com/questions/15176538/net-httpclient-how-to-post-string-value
+            //     https://www.asp.net/web-api/overview/advanced/calling-a-web-api-from-a-net-client
+            //     https://developer.spotify.com/web-api/authorization-guide/
+            //     https://tools.ietf.org/html/rfc6749#section-4.1.3
             var pairs = new List<KeyValuePair<string, string>>
             {
                 new KeyValuePair<string, string>("grant_type", "authorization_code"),
@@ -265,7 +230,9 @@ namespace TrimbleIdOAuthTest
                 new KeyValuePair<string, string>("code", codestr),
                 new KeyValuePair<string, string>("redirect_uri", redirUrl)
             };
-            var content = new FormUrlEncodedContent(pairs);
+            string contentstr = "grant_type=authorization_code&tenantDomain=trimble.com&code=" + codestr + "&redirect_uri=" + redirUrl;
+            //var content = new FormUrlEncodedContent(pairs);
+            var content = new StringContent(contentstr);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
             HttpClient client = new HttpClient();
@@ -280,46 +247,6 @@ namespace TrimbleIdOAuthTest
                 string tmp_xxx = "success";
             }
 
-
-
-
-
-                
-
-
-
-            //request.Headers.Accept.Add()
-            //request.Headers.CacheControl = "no-cache";
-
-            //var response = await context.Backchannel.SendAsync(request, context.HttpContext.RequestAborted);
-            //response.EnsureSuccessStatusCode();
-            //var content = response.Content.ReadAsStringAsync();
-
-            //string tmp_hello = "hello";
-
-            //var user = JObject.Parse(await response.Content.ReadAsStringAsync());
-
-            //        function requestTID_JWT(code) {
-            //            var instr = global.consumerKey + ":" + global.consumerSecret;
-            //            var options = {
-            //            host: 'identity-stg.trimble.com',
-            //path: '/i/oauth2/token?grant_type=authorization_code&tenantDomain=trimble.com&code=' + code + "&redirect_uri=" + encodeURIComponent(global.redirectLocalURL),
-            //method: "POST",
-            ////This is the only line that is new. `headers` is an object with the headers to request
-            //headers:
-            //            {
-            //                "Content-Type": "application/x-www-form-urlencoded",
-            //	"Authorization": "Basic " + new Buffer(instr).toString('base64'),
-            //	"Accept": "application/json",
-            //	"Cache-Control": "no-cache"
-
-            //            }
-            //        };
-            //        console.log("requestTID_JWT: code=" + code);
-
-            //        var req = https.request(options, (res) =>
-            //        {
-            //        }
         }
     }
 
