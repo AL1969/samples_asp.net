@@ -198,7 +198,8 @@ namespace TrimbleIdOAuthTest
         {
             StringValues codestr = new StringValues();
             var bFoundCode = context.Request.Query.TryGetValue("code", out codestr);
-            string redirUrl = "http://localhost:64881/signin-tid-token";
+            //string redirUrl = "http://localhost:64881/signin-tid-token";
+            string redirUrl = "http://localhost:8888/auth_trimbleid/oauth_after.html";
 
             System.Uri redirUri = new System.Uri(redirUrl);
 
@@ -209,15 +210,18 @@ namespace TrimbleIdOAuthTest
             var request = new HttpRequestMessage(HttpMethod.Post, sPostUrl);
 
             string recAccessToken = context.AccessToken;
-            string testAccessTokenStr = "vHDnG98OicY1asmxzcVFYYk_UJMa:UekcdFkvAWALmTrDSbBf7gVGVIsa";
+            string testAccessTokenStr = "HA74m6PPY7Ss__sz0UMUDGimMYYa:XpVqBf2cY2gE0W7qyHY9sOtPNfga";
             byte[] testAccessToken = System.Text.Encoding.UTF8.GetBytes(testAccessTokenStr);
             string testAccessTokenBas64 = "Basic " + Microsoft.AspNetCore.Authentication.Base64UrlTextEncoder.Encode(testAccessToken);
 
             // overwrite with values from JS
-            codestr = "ed4e14564a8b1b337bc4821c64464b6";
-            redirUrl = "http://localhost:8888/auth_trimbleid/oauth_after.html";
-            //redirUrl = "http%3A%2F%2Flocalhost%3A8888%2Fauth_trimbleid%2Foauth_after.html";
+            codestr = "eeec54fb4942caa1d448a011ae794c50";
+            //redirUrl = "http://localhost:8888/auth_trimbleid/oauth_after.html";
+            redirUrlEnc = "http%3A%2F%2Flocalhost%3A8888%2Fauth_trimbleid%2Foauth_after.html";
             testAccessTokenBas64 = "Basic SEE3NG02UFBZN1NzX19zejBVTVVER2ltTVlZYTpYcFZxQmYyY1kyZ0UwVzdxeUhZOXNPdFBOZmdh";
+
+            //specify to use TLS 1.2 as default connection
+            //System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
             // see http://stackoverflow.com/questions/15176538/net-httpclient-how-to-post-string-value
             //     https://www.asp.net/web-api/overview/advanced/calling-a-web-api-from-a-net-client
@@ -228,9 +232,9 @@ namespace TrimbleIdOAuthTest
                 new KeyValuePair<string, string>("grant_type", "authorization_code"),
                 new KeyValuePair<string, string>("tenantDomain", "trimble.com"),
                 new KeyValuePair<string, string>("code", codestr),
-                new KeyValuePair<string, string>("redirect_uri", redirUrl)
+                new KeyValuePair<string, string>("redirect_uri", redirUrlEnc)
             };
-            string contentstr = "grant_type=authorization_code&tenantDomain=trimble.com&code=" + codestr + "&redirect_uri=" + redirUrl;
+            string contentstr = "grant_type=authorization_code&tenantDomain=trimble.com&code=" + codestr + "&redirect_uri=" + redirUrlEnc;
             //var content = new FormUrlEncodedContent(pairs);
             var content = new StringContent(contentstr);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
@@ -240,6 +244,7 @@ namespace TrimbleIdOAuthTest
             client.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
             client.DefaultRequestHeaders.Add("Authorization", testAccessTokenBas64);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Add("Host", "identity-stg.trimble.com");
 
             var response = client.PostAsync("/i/oauth2/token", content).Result;
             if (response.IsSuccessStatusCode)
