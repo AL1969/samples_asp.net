@@ -115,8 +115,16 @@ namespace TrimbleIdOAuthTest
             */
             app.UseTrimbleAuthentication(new TrimbleAuthenticationOptions
             {
+                AuthenticationScheme = "TID-AccessToken",
+                DisplayName = "TID-AccessToken",
                 ClientId = Configuration["Authentication:TrimbleID:ClientId"],
-                ClientSecret = Configuration["Authentication:TrimbleID:ClientSecret"]
+                ClientSecret = Configuration["Authentication:TrimbleID:ClientSecret"],
+                CallbackPath = new PathString("/auth_trimbleid/oauth_after.html"),
+                AuthorizationEndpoint = "https://identity-stg.trimble.com/i/oauth2/authorize",
+                TokenEndpoint = "https://identity-stg.trimble.com/i/oauth2/token",
+                UserInformationEndpoint = "https://identity-stg.trimble.com/userinfo?schema=openid",
+                SaveTokens = false,
+                Scope = { "openid" }
             });
 
             // Add external authentication middleware below. To configure them please see http://go.microsoft.com/fwlink/?LinkID=532715
