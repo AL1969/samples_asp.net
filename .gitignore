@@ -33,3 +33,5 @@ obj/
 [Rr]elease*/
 Ankh.NoLoad
 
+src_/
+.vs/
