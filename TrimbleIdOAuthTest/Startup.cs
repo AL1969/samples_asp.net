@@ -115,15 +115,15 @@ namespace TrimbleIdOAuthTest
             */
             app.UseTrimbleAuthentication(new TrimbleAuthenticationOptions
             {
-                AuthenticationScheme = "TID-AccessToken",
-                DisplayName = "TID-AccessToken",
+                //AuthenticationScheme = "TID-AccessToken",
+                //DisplayName = "TID-AccessToken",
                 ClientId = Configuration["Authentication:TrimbleID:ClientId"],
                 ClientSecret = Configuration["Authentication:TrimbleID:ClientSecret"],
-                CallbackPath = new PathString("/auth_trimbleid/oauth_after.html"),
-                AuthorizationEndpoint = "https://identity-stg.trimble.com/i/oauth2/authorize",
-                TokenEndpoint = "https://identity-stg.trimble.com/i/oauth2/token",
-                UserInformationEndpoint = "https://identity-stg.trimble.com/userinfo?schema=openid",
-                SaveTokens = false,
+                //CallbackPath = new PathString("/auth_trimbleid/oauth_after.html"),
+                //AuthorizationEndpoint = "https://identity-stg.trimble.com/i/oauth2/authorize",
+                //TokenEndpoint = "https://identity-stg.trimble.com/i/oauth2/token",
+                //UserInformationEndpoint = "https://identity-stg.trimble.com/userinfo?schema=openid",
+                //SaveTokens = false,
                 Scope = { "openid" }
             });
 

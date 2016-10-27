@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace AspNet.Security.OAuth.Trimble {
@@ -20,6 +21,8 @@ namespace AspNet.Security.OAuth.Trimble {
             : base(client) {
         }
 
+
+        /*
         protected override async Task<AuthenticationTicket> CreateTicketAsync(ClaimsIdentity identity,
             AuthenticationProperties properties, OAuthTokenResponse tokens) {
             // Note: access tokens and request keys are passed in the querystring for Trimble
@@ -52,55 +55,9 @@ namespace AspNet.Security.OAuth.Trimble {
 
             return context.Ticket;
         }
+        */
 
         protected override async Task<OAuthTokenResponse> ExchangeCodeAsync(string code, string redirectUri) {
-
-            /*
-                        string redirUrlEnc = System.Net.WebUtility.UrlEncode(redirUrl);
-                        string sPostUrl = "https://identity-stg.trimble.com/i/oauth2/token";
-                        var request = new HttpRequestMessage(HttpMethod.Post, sPostUrl);
-
-                        string recAccessToken = context.AccessToken;
-                        string testAccessTokenStr = "vHDnG98OicY1asmxzcVFYYk_UJMa:UekcdFkvAWALmTrDSbBf7gVGVIsa";
-                        byte[] testAccessToken = System.Text.Encoding.UTF8.GetBytes(testAccessTokenStr);
-                        string testAccessTokenBas64 = "Basic " + Microsoft.AspNetCore.Authentication.Base64UrlTextEncoder.Encode(testAccessToken);
-
-                        // overwrite with values from JS
-                        //codestr = "bc8e9e4216d746693feb673491776";
-                        //redirUrl = "http://localhost:8888/auth_trimbleid/oauth_after.html";
-                        redirUrlEnc = "http%3A%2F%2Flocalhost%3A8888%2Fauth_trimbleid%2Foauth_after.html";
-                        testAccessTokenBas64 = "Basic SEE3NG02UFBZN1NzX19zejBVTVVER2ltTVlZYTpYcFZxQmYyY1kyZ0UwVzdxeUhZOXNPdFBOZmdh";
-
-                        // see http://stackoverflow.com/questions/15176538/net-httpclient-how-to-post-string-value
-                        //     http://www.asp.net/web-api/overview/advanced/calling-a-web-api-from-a-net-client
-                        //     http://developer.spotify.com/web-api/authorization-guide/
-                        //     http://tools.ietf.org/html/rfc6749#section-4.1.3
-                        //string contentstr = "grant_type=authorization_code&tenantDomain=trimble.com&code=" + codestr + "&redirect_uri=" + redirUrlEnc;
-                        string contentstr = "grant_type=authorization_code&tenantDomain=trimble.com&code=" + codestr + "&redirect_uri=" + redirUrlEnc;
-                        //var content = new FormUrlEncodedContent(pairs);
-                        var content = new StringContent(contentstr);
-                        content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
-
-                        HttpClient client = new HttpClient();
-                        client.BaseAddress = new Uri("https://identity-stg.trimble.com");
-                        client.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
-                        client.DefaultRequestHeaders.Add("Authorization", testAccessTokenBas64);
-                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                        client.DefaultRequestHeaders.Add("Host", "identity-stg.trimble.com");
-
-                        var response = client.PostAsync("/i/oauth2/token", content).Result;
-
-
-
-
-                        var credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{Options.ClientId}:{Options.ClientSecret}"));
-
-            var request = new HttpRequestMessage(HttpMethod.Post, Options.TokenEndpoint);
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            request.Headers.Authorization = new AuthenticationHeaderValue("Basic", credentials);
-
-
-             */
 
             var credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{Options.ClientId}:{Options.ClientSecret}"));
 
@@ -113,7 +70,6 @@ namespace AspNet.Security.OAuth.Trimble {
             });
             request.Headers.Add("Cache-Control", "no-cache");
             request.Headers.Authorization = new AuthenticationHeaderValue("Basic", credentials);
-            //request.Headers.Add("Authorization", testAccessTokenBas64);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Headers.Add("Host", "identity-stg.trimble.com");
 
@@ -127,20 +83,62 @@ namespace AspNet.Security.OAuth.Trimble {
 
                 return OAuthTokenResponse.Failed(new Exception("An error occurred when retrieving an access token."));
             }
+            //response.
 
             // Note: Trimble's token endpoint doesn't return JSON but uses application/x-www-form-urlencoded.
             // Since OAuthTokenResponse expects a JSON payload, a JObject is manually created using the returned values.
 
-
             string responsestr = await response.Content.ReadAsStringAsync();
+            Dictionary<string, string> responseVals = JsonConvert.DeserializeObject<Dictionary<string, string>>(responsestr);
 
-            //var content = QueryHelpers.ParseQuery(await response.Content.ReadAsStringAsync());
+            //JsonConvert
             var content = QueryHelpers.ParseQuery(responsestr);
-
             var payload = new JObject();
             foreach (var item in content) {
-                payload[item.Key] = (string) item.Value;
+                string ikey = (string)item.Key;
+                string ival = (string)item.Value;
+                //payload[item.Key] = (string) item.Value;
             }
+
+            //JToken id_token = payload.GetValue("id_token");
+            string sIdtoken;
+            responseVals.TryGetValue("id_token", out sIdtoken);
+
+            sIdtoken = "eyJhbGciOiJSUzI1NiJ9.eyJodHRwOlwvXC93c28yLm9yZ1wvY2xhaW1zXC9pZGVudGl0eVwvdW5sb2NrVGltZSI6IjAiLCJzdWIiOiJhbmRyZWFzX2xhbmdAdHJpbWJsZS5jb20iLCJodHRwOlwvXC93c28yLm9yZ1wvY2xhaW1zXC9hY2NvdW50bmFtZSI6InRyaW1ibGUuY29tIiwiYXpwIjoiSEE3NG02UFBZN1NzX19zejBVTVVER2ltTVlZYSIsImh0dHA6XC9cL3dzbzIub3JnXC9jbGFpbXNcL2ZpcnN0bmFtZSI6IkFuZHJlYXMiLCJhdF9oYXNoIjoiVTJKTjdtOEJfbGxjMFM0TjN0TUYzdyIsImlzcyI6Imh0dHBzOlwvXC9pZGVudGl0eS1zdGcudHJpbWJsZS5jb20iLCJodHRwOlwvXC93c28yLm9yZ1wvY2xhaW1zXC9sYXN0bmFtZSI6IkxhbmciLCJodHRwOlwvXC93c28yLm9yZ1wvY2xhaW1zXC90ZWxlcGhvbmUiOiIrNDk4OTg5MDU3MTQ4NCIsImh0dHA6XC9cL3dzbzIub3JnXC9jbGFpbXNcL3V1aWQiOiI2YmM5YTllMS1hNTI3LTQ0NWMtYWNlNS1lZTEyMTZkNmRjMjgiLCJpYXQiOjE0Nzc0ODY2OTAsImh0dHA6XC9cL3dzbzIub3JnXC9jbGFpbXNcL2dpdmVubmFtZSI6IkFuZHJlYXMiLCJhdXRoX3RpbWUiOjE0Nzc0NzAxNzUsImV4cCI6MTQ3NzQ5MDI5MCwiaHR0cDpcL1wvd3NvMi5vcmdcL2NsYWltc1wvaWRlbnRpdHlcL2ZhaWxlZExvZ2luQXR0ZW1wdHMiOiIwIiwiaHR0cDpcL1wvd3NvMi5vcmdcL2NsYWltc1wvaWRlbnRpdHlcL2FjY291bnRMb2NrZWQiOiJmYWxzZSIsImh0dHA6XC9cL3dzbzIub3JnXC9jbGFpbXNcL2NvdW50cnkiOiJHZXJtYW55IiwiYXVkIjpbIkhBNzRtNlBQWTdTc19fc3owVU1VREdpbU1ZWWEiXSwiaHR0cDpcL1wvd3NvMi5vcmdcL2NsYWltc1wvZW1haWxhZGRyZXNzIjoiYW5kcmVhc19sYW5nQHRyaW1ibGUuY29tIiwiaHR0cDpcL1wvd3NvMi5vcmdcL2NsYWltc1wvYWNjb3VudHVzZXJuYW1lIjoiYW5kcmVhc19sYW5nIn0.gyZmMY5lx5Kzko5cLwJY04TUBpe3VXxklSNImqCWt6wM5PB9NKtkh5cczQf0gw53NuIzNKIYPMIj__BGYjTJ5Dc_VUdFk0QLA2XdCTX82EpxJ1AGg3a9Ny0XRGmzzjQoiVm_r2BiKuxxN0 - 6yPdnEtwX85HNwJnFNBfQv4PnKXg";
+
+            //char[] carr = sIdtoken.ToCharArray();
+            //int len = carr.Length;
+            //byte[] convbytes = Convert.FromBase64CharArray(carr, 0, len);
+
+            //byte[] inbytes = Encoding.ASCII.GetChars()
+            //int len = inbytes.Length;
+            //byte[] convbytes = Convert.FromBase64CharArray(inbytes, 0, len);
+
+            //string idtokenstr = (string) payload.GetValue("id_token");
+            //string sIdJson = Convert.FromBase64String(sIdtoken).ToString();
+            byte[] convbytes = Convert.FromBase64String(sIdtoken);
+            //byte[] convbytes = Convert.FromBase64CharArray(sIdtoken.ToCharArray());
+
+
+            /*
+             * 			var req = https.request(options, (res) => {
+                            res.setEncoding('utf-8');
+                            res.on('data', (chunk) => {
+                                //requestTC_JWT(JSON.parse(chunk).id_token);
+                                console.log("requestTID_JWT - response BODY:\n**********\n" + chunk + "\n**********\n");
+                                var id_token = JSON.parse(chunk).id_token;
+                                console.log("requestTID_JWT - response id_token:\n**********\n" + id_token + "\n**********\n");
+                                var id_token_buf = new Buffer(id_token, 'base64');
+                                console.log("requestTID_JWT - response id_token_buf tostring:\n**********\n" + id_token_buf.toString('utf8') + "\n**********\n");
+                                browserWindow.loadURL(redirectURL);
+                            });
+                            res.on('end', () => {
+                                console.log("requestTID_JWT - response: No more data in response.");
+                            });
+                        });
+
+             */
+
 
             return OAuthTokenResponse.Success(payload);
         }
