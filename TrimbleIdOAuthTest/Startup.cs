@@ -19,6 +19,7 @@ using Microsoft.Extensions.Primitives;
 using TrimbleIdOAuthTest.Data;
 using TrimbleIdOAuthTest.Models;
 using TrimbleIdOAuthTest.Services;
+using AspNet.Security.OAuth.Trimble;
 using Newtonsoft.Json.Linq;
 
 namespace TrimbleIdOAuthTest
@@ -92,6 +93,7 @@ namespace TrimbleIdOAuthTest
 
             app.UseIdentity();
 
+            /*
             app.UseOAuthAuthentication(new OAuthOptions
             {
                 AuthenticationScheme = "TID-AccessToken",
@@ -107,19 +109,14 @@ namespace TrimbleIdOAuthTest
                 // Retrieving user information is unique to each provider.
                 Events = new OAuthEvents
                 {
-                    OnCreatingTicket = async context => { await CreatingTrimbleIdAuthTicket(context); },
-                    //OnRedirectToAuthorizationEndpoint = async context =>
-                    //{
-                    //    // Get the GitHub user
-                    //    //    var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
-                    //    string tmp_yyy = "hello";
-                    //    //next;
-                    //},
-                    OnTicketReceived = async context =>
-                    {
-                        //string tmp_zzz = "world";
-                    }
+                    OnCreatingTicket = async context => { await CreatingTrimbleIdAuthTicket(context); }
                 }
+            });
+            */
+            app.UseTrimbleAuthentication(new TrimbleAuthenticationOptions
+            {
+                ClientId = Configuration["Authentication:TrimbleID:ClientId"],
+                ClientSecret = Configuration["Authentication:TrimbleID:ClientSecret"]
             });
 
             // Add external authentication middleware below. To configure them please see http://go.microsoft.com/fwlink/?LinkID=532715
@@ -132,6 +129,7 @@ namespace TrimbleIdOAuthTest
             });
         }
 
+        /*
         private static async Task CreatingTrimbleIdAuthTicket(OAuthCreatingTicketContext context)
         {
             StringValues codestr = new StringValues();
@@ -188,6 +186,7 @@ namespace TrimbleIdOAuthTest
             }
 
         }
+        */
     }
 
 }

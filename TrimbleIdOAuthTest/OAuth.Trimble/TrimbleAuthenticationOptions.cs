@@ -29,8 +29,8 @@ namespace AspNet.Security.OAuth.Trimble {
 
         /// <summary>
         /// Gets or sets the site on which the user is registered.
-        /// By default, this property is set to "StackOverflow".
+        /// By default, this property is set to "Trimble".
         /// </summary>
-        public string Site { get; set; } = "StackOverflow";
+        public string Site { get; set; } = "Trimble";
     }
 }
