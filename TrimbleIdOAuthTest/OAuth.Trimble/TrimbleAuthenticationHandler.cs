@@ -129,7 +129,7 @@ namespace AspNet.Security.OAuth.Trimble {
             }
             payload["lastname"] = lastname;
 
-
+            // ToDo: add full name or something like this
             identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, TrimbleAuthenticationHelper.GetIdentifier(payload)));
             identity.AddClaim(new Claim(ClaimTypes.Name, TrimbleAuthenticationHelper.GetName(payload)));
             identity.AddClaim(new Claim(ClaimTypes.Email, TrimbleAuthenticationHelper.GetEmail(payload)));
