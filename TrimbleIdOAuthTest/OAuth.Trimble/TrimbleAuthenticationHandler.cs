@@ -24,6 +24,121 @@ namespace AspNet.Security.OAuth.Trimble {
 
         protected override async Task<AuthenticationTicket> CreateTicketAsync(ClaimsIdentity identity,
             AuthenticationProperties properties, OAuthTokenResponse tokens) {
+
+            JObject tokenResponseVals = tokens.Response;
+            //Dictionary<string, string> tokenResponseVals = JsonConvert.DeserializeObject<Dictionary<string, string>>(tokenResponse);
+
+            //string sIdtokenEnc = tokenResponseVals.TryGetValue("id_token");
+            //tokenResponseVals.TryGetValue("id_token", out sIdtokenEnc);
+            //string sIdtokenEnc;
+            JToken token = tokenResponseVals.GetValue("id_token");
+            string sIdtokenEnc = token.ToString();
+
+            JObject payload = new JObject();
+
+            // To use directly Convert.FromBase64String leads to invalid character exception.
+            // This is because there are illegal characters in it (".").
+            // That's why we use this as separator for making substrings. One of it includes the information we want.
+            var sentences = new List<String>();
+            int position = 0;
+            int start = 0;
+            // Extract sentences from the string.
+            do
+            {
+                position = sIdtokenEnc.IndexOf('.', start);
+                if (position >= 0)
+                {
+                    sentences.Add(sIdtokenEnc.Substring(start, position - start).Trim());
+                    start = position + 1;
+                }
+            } while (position > 0);
+
+            // Display the sentences.
+            string sIdtokenJson = null;
+            foreach (string sentence in sentences)
+            {
+                string sToDecode = sentence;
+                // do some padding fro the decoder
+                while (sToDecode.Length % 4 != 0)
+                {
+                    sToDecode += "=";
+                }
+                byte[] bDecoded = Convert.FromBase64String(sToDecode);
+                StringBuilder tmpStringBuilder = new StringBuilder();
+                tmpStringBuilder.Append(System.Text.UTF8Encoding.UTF8.GetChars(bDecoded));
+                string sDecoded = tmpStringBuilder.ToString();
+                if (sDecoded.Contains("email"))
+                {
+                    sIdtokenJson = sDecoded;
+                }
+            }
+
+            string username = null;
+            string firstname = null;
+            string lastname = null;
+            string email = null;
+            if (sIdtokenJson != null)
+            {
+                sIdtokenJson = sIdtokenJson.Replace("[", "");
+                sIdtokenJson = sIdtokenJson.Replace("]", "");
+                Dictionary<string, string> idtokenVals = JsonConvert.DeserializeObject<Dictionary<string, string>>(sIdtokenJson);
+                foreach (var item in idtokenVals)
+                {
+                    string ikey = (string)item.Key;
+                    string ival = (string)item.Value;
+                    if (ikey.Contains("username"))
+                    {
+                        username = ival;
+                    }
+                    if (ikey.Contains("firstname"))
+                    {
+                        firstname = ival;
+                    }
+                    if (ikey.Contains("lastname"))
+                    {
+                        lastname = ival;
+                    }
+                    if (ikey.Contains("email"))
+                    {
+                        email = ival;
+                    }
+                }
+            }
+
+            // TODO: check mandatory stuff
+
+            if (username == null)
+            {
+                //return OAuthTokenResponse.Failed(new Exception("No username found in ID token."));
+            }
+            if (email == null)
+            {
+                //return OAuthTokenResponse.Failed(new Exception("No email address found in ID token."));
+            }
+
+            payload["username"] = username;
+            payload["email"] = email;
+            if (firstname == null)
+            {
+                firstname = "<unknown firstname>";
+            }
+            payload["firstname"] = firstname;
+            if (lastname == null)
+            {
+                lastname = "<unknown lastname>";
+            }
+            payload["lastname"] = lastname;
+
+
+            identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, TrimbleAuthenticationHelper.GetIdentifier(payload)));
+            identity.AddClaim(new Claim(ClaimTypes.Name, TrimbleAuthenticationHelper.GetName(payload)));
+            identity.AddClaim(new Claim(ClaimTypes.Email, TrimbleAuthenticationHelper.GetEmail(payload)));
+            //var principal = new ClaimsPrincipal(identity);
+
+
+
+            /**/
+
             // Note: access tokens and request keys are passed in the querystring for Trimble
             //var address = QueryHelpers.AddQueryString(Options.UserInformationEndpoint, new Dictionary<string, string>() {
             //    ["access_token"] = tokens.AccessToken,
@@ -47,14 +162,14 @@ namespace AspNet.Security.OAuth.Trimble {
             //        .AddOptionalClaim("urn:Trimble:link", TrimbleAuthenticationHelper.GetLink(payload), Options.ClaimsIssuer);
             //identity.AddClaims(ClaimTypes.NameIdentifier, TrimbleAuthenticationHelper.GetIdentifier(payload), Options.ClaimsIssuer);
 
-            //var principal = new ClaimsPrincipal(identity);
-            //var ticket = new AuthenticationTicket(principal, properties, Options.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+            var ticket = new AuthenticationTicket(principal, properties, Options.AuthenticationScheme);
 
-            //var context = new OAuthCreatingTicketContext(ticket, Context, Options, Backchannel, tokens, payload);
-            //await Options.Events.CreatingTicket(context);
+            var context = new OAuthCreatingTicketContext(ticket, Context, Options, Backchannel, tokens, payload);
+            await Options.Events.CreatingTicket(context);
 
-            //return context.Ticket;
-            return null;
+            return context.Ticket;
+            //return null;
         }
 
         protected override async Task<OAuthTokenResponse> ExchangeCodeAsync(string code, string redirectUri) {
@@ -105,6 +220,7 @@ namespace AspNet.Security.OAuth.Trimble {
             //JToken id_token = payload.GetValue("id_token");
             string sIdtokenEnc;
             responseVals.TryGetValue("id_token", out sIdtokenEnc);
+            /*
 
             // To use directly Convert.FromBase64String leads to invalid character exception.
             // This is because there are illegal characters in it (".").
@@ -196,6 +312,7 @@ namespace AspNet.Security.OAuth.Trimble {
                 lastname = "<unknown lastname>";
             }
             payload["lastname"] = lastname;
+            */
 
             return OAuthTokenResponse.Success(payload);
         }

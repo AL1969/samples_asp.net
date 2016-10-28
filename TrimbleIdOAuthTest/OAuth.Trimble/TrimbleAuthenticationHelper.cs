@@ -10,21 +10,21 @@ namespace AspNet.Security.OAuth.Trimble {
         /// <summary>
         /// Gets the identifier corresponding to the authenticated user.
         /// </summary>
-        public static string GetIdentifier(JObject user) => user["items"]?[0]?.Value<string>("account_id");
+        public static string GetIdentifier(JObject user) => user.Value<string>("username");
 
         /// <summary>
-        /// Gets the display name corresponding to the authenticated user.
+        /// Gets the internal response code from the web request
         /// </summary>
-        public static string GetDisplayName(JObject user) => user["items"]?[0]?.Value<string>("display_name");
+        public static JObject GetError(JObject user) => user.Value<JObject>("error");
 
         /// <summary>
-        /// Gets the URL corresponding to the authenticated user.
+        /// Gets the login corresponding to the authenticated user.
         /// </summary>
-        public static string GetLink(JObject user) => user["items"]?[0]?.Value<string>("link");
+        public static string GetName(JObject user) => user.Value<string>("firstname");
 
         /// <summary>
-        /// Gets the website URL associated with the authenticated user.
+        /// Gets the email address corresponding to the authenticated user.
         /// </summary>
-        public static string GetWebsiteUrl(JObject user) => user["items"]?[0]?.Value<string>("website_url");
+        public static string GetEmail(JObject user) => user.Value<string>("email");
     }
 }
