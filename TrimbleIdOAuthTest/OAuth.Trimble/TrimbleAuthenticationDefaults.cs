@@ -9,7 +9,7 @@ namespace AspNet.Security.OAuth.Trimble {
         /// <summary>
         /// Default value for <see cref="AuthenticationOptions.AuthenticationScheme"/>.
         /// </summary>
-        public const string AuthenticationScheme = "Trimble";
+        public const string AuthenticationScheme = "Trimble Identity";
 
         /*
         app.UseOAuthAuthentication(new OAuthOptions
@@ -45,8 +45,8 @@ namespace AspNet.Security.OAuth.Trimble {
         /// <summary>
         /// Default value for <see cref="RemoteAuthenticationOptions.CallbackPath"/>.
         /// </summary>
-        //public const string CallbackPath = "/signin-Trimble";
-        public const string CallbackPath = "/auth_trimbleid/oauth_after.html";
+        public const string CallbackPath = "/signin-Trimble";
+        //public const string CallbackPath = "/auth_trimbleid/oauth_after.html";
 
         /// <summary>
         /// Default value for <see cref="OAuthOptions.AuthorizationEndpoint"/>.

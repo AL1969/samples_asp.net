@@ -101,15 +101,12 @@ namespace AspNet.Security.OAuth.Trimble {
                 }
             }
 
-            // TODO: check mandatory stuff
-
+            // check mandatory stuff
             if ((username == null) || (email == null))
             {
                 return null;
             }
-
-            //payload["username"] = username;
-            //payload["email"] = email;
+            // fill other data if not provided
             string fullname = null;
             if (lastname == null)
             {
@@ -119,7 +116,6 @@ namespace AspNet.Security.OAuth.Trimble {
             {
                 fullname = lastname;
             }
-            //payload["lastname"] = lastname;
             if (firstname == null)
             {
                 firstname = "<unknown firstname>";
@@ -128,12 +124,8 @@ namespace AspNet.Security.OAuth.Trimble {
                     fullname = firstname + " " + fullname;
                 }
             }
-            //payload["firstname"] = firstname;
 
-            // ToDo: add full name or something like this
-            //identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, TrimbleAuthenticationHelper.GetIdentifier(payload)));
-            //identity.AddClaim(new Claim(ClaimTypes.Name, TrimbleAuthenticationHelper.GetName(payload)));
-            //identity.AddClaim(new Claim(ClaimTypes.Email, TrimbleAuthenticationHelper.GetEmail(payload)));
+            // set identity principal
             identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, username));
             identity.AddClaim(new Claim(ClaimTypes.Email, email));
             if (fullname == null)
@@ -144,10 +136,8 @@ namespace AspNet.Security.OAuth.Trimble {
             {
                 identity.AddClaim(new Claim(ClaimTypes.Name, fullname));
             }
-
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, properties, Options.AuthenticationScheme);
-
             var context = new OAuthCreatingTicketContext(ticket, Context, Options, Backchannel, tokens, payload);
             await Options.Events.CreatingTicket(context);
 
