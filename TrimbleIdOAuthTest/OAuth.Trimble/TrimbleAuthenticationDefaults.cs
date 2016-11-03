@@ -11,27 +11,6 @@ namespace AspNet.Security.OAuth.Trimble {
         /// </summary>
         public const string AuthenticationScheme = "Trimble Identity";
 
-        /*
-        app.UseOAuthAuthentication(new OAuthOptions
-        {
-            AuthenticationScheme = "TID-AccessToken",
-            DisplayName = "TID-AccessToken",
-            ClientId = Configuration["Authentication:TrimbleID:ClientId"],
-            ClientSecret = Configuration["Authentication:TrimbleID:ClientSecret"],
-            CallbackPath = new PathString("/auth_trimbleid/oauth_after.html"),
-            AuthorizationEndpoint = "https://identity-stg.trimble.com/i/oauth2/authorize",
-            TokenEndpoint = "https://identity-stg.trimble.com/i/oauth2/token",
-            UserInformationEndpoint = "https://identity-stg.trimble.com/userinfo?schema=openid",
-            SaveTokens = false,
-            Scope = { "openid" },
-            // Retrieving user information is unique to each provider.
-            Events = new OAuthEvents
-            {
-                OnCreatingTicket = async context => { await CreatingTrimbleIdAuthTicket(context); }
-            }
-        });
-        */
-
         /// <summary>
         /// Default value for <see cref="RemoteAuthenticationOptions.DisplayName"/>.
         /// </summary>
